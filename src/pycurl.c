@@ -85,15 +85,18 @@ typedef int Py_ssize_t;
 #   define PYCURL_NEED_OPENSSL_TSL
 #   include <openssl/crypto.h>
 # elif defined(HAVE_CURL_GNUTLS)
-#   define PYCURL_NEED_SSL_TSL
-#   define PYCURL_NEED_GNUTLS_TSL
-#   include <gcrypt.h>
-# else
+#   include <gnutls/gnutls.h>
+#   if GNUTLS_VERSION_NUMBER <= 0x020b00
+#     define PYCURL_NEED_SSL_TSL
+#     define PYCURL_NEED_GNUTLS_TSL
+#     include <gcrypt.h>
+#   endif
+# elif !defined(HAVE_CURL_NSS)
 #  warning \
    "libcurl was compiled with SSL support, but configure could not determine which " \
    "library was used; thus no SSL crypto locking callbacks will be set, which may " \
    "cause random crashes on SSL requests"
-# endif /* HAVE_CURL_OPENSSL || HAVE_CURL_GNUTLS */
+# endif /* HAVE_CURL_OPENSSL || HAVE_CURL_GNUTLS || HAVE_CURL_NSS */
 #endif /* HAVE_CURL_SSL */
 
 #if defined(PYCURL_NEED_SSL_TSL)
