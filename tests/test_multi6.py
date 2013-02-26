@@ -41,7 +41,7 @@ while num_handles:
     while 1:
         ret, num_handles = m.perform()
         # Print the message, if any
-        print m.info_read(1)
+        print(m.info_read(1))
         if ret != pycurl.E_CALL_MULTI_PERFORM:
             break
 
@@ -56,7 +56,7 @@ c3.body.close()
 c1.close()
 c2.close()
 c3.close()
-print "http://www.python.org is in file doc1"
-print "http://curl.haxx.se is in file doc2"
-print "http://slashdot.org is in file doc3"
+print("http://www.python.org is in file doc1")
+print("http://curl.haxx.se is in file doc2")
+print("http://slashdot.org is in file doc3")
 

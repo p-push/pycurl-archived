@@ -12,7 +12,7 @@ import pycurl
 
 url = "http://curl.haxx.se/dev/"
 
-print "Testing", pycurl.version
+print("Testing", pycurl.version)
 
 body = StringIO()
 c = pycurl.Curl()
@@ -22,4 +22,4 @@ c.perform()
 c.close()
 
 contents = body.getvalue()
-print contents
+print(contents)

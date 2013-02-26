@@ -31,18 +31,18 @@ except IndexError:
 def timer(msecs):
     global timeout
     timeout = msecs
-    print 'Timer callback msecs:', msecs
+    print('Timer callback msecs:', msecs)
 
 # socket callback
 def socket(event, socket, multi, data):
     if event == pycurl.POLL_REMOVE:
-        print "Remove Socket %d"%socket
+        print("Remove Socket %d"%socket)
         sockets.remove(socket)
     else:
         if socket not in sockets:
-            print "Add socket %d"%socket
+            print("Add socket %d"%socket)
             sockets.add(socket)
-    print event, socket, multi, data
+    print(event, socket, multi, data)
 
 # init
 m = pycurl.CurlMulti()
@@ -98,8 +98,8 @@ m.close()
 for c in m.handles:
     data = c.body.getvalue()
     if 0:
-        print "**********", c.url, "**********"
-        print data
+        print("**********", c.url, "**********")
+        print(data)
     else:
-        print "%-53s http_code %3d, %6d bytes" % (c.url, c.http_code, len(data))
+        print("%-53s http_code %3d, %6d bytes" % (c.url, c.http_code, len(data)))
 

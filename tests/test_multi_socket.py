@@ -26,11 +26,11 @@ except IndexError:
 
 # timer callback
 def timer(msecs):
-    print 'Timer callback msecs:', msecs
+    print('Timer callback msecs:', msecs)
 
 # socket callback
 def socket(event, socket, multi, data):
-    print event, socket, multi, data
+    print(event, socket, multi, data)
 #    multi.assign(socket, timer)
 
 # init
@@ -75,8 +75,8 @@ m.close()
 for c in m.handles:
     data = c.body.getvalue()
     if 0:
-        print "**********", c.url, "**********"
-        print data
+        print("**********", c.url, "**********")
+        print(data)
     else:
-        print "%-53s http_code %3d, %6d bytes" % (c.url, c.http_code, len(data))
+        print("%-53s http_code %3d, %6d bytes" % (c.url, c.http_code, len(data)))
 

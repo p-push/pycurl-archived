@@ -38,7 +38,7 @@ try:
     urls = open(sys.argv[1]).readlines()
 except IndexError:
     # No file was specified, show usage string
-    print "Usage: %s <file with uris to fetch>" % sys.argv[0]
+    print("Usage: %s <file with uris to fetch>" % sys.argv[0])
     raise SystemExit
 
 # Initialize thread array and the file number
@@ -58,7 +58,7 @@ for thread, file in threads:
     thread.join()
     file.close()
 t2 = time.time()
-print "\n** Multithreading, %d seconds elapsed for %d uris" % (int(t2-t1), len(urls))
+print("\n** Multithreading, %d seconds elapsed for %d uris" % (int(t2-t1), len(urls)))
 
 # Start one thread per URI in sequence
 fileno = 0
@@ -71,4 +71,4 @@ for url in urls:
     t.join()
     f.close()
 t2 = time.time()
-print "\n** Singlethreading, %d seconds elapsed for %d uris" % (int(t2-t1), len(urls))
+print("\n** Singlethreading, %d seconds elapsed for %d uris" % (int(t2-t1), len(urls)))

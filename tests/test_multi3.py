@@ -80,8 +80,8 @@ m.close()
 for c in m.handles:
     data = c.body.getvalue()
     if 0:
-        print "**********", c.url, "**********"
-        print data
+        print("**********", c.url, "**********")
+        print(data)
     else:
-        print "%-53s http_code %3d, %6d bytes" % (c.url, c.http_code, len(data))
+        print("%-53s http_code %3d, %6d bytes" % (c.url, c.http_code, len(data)))
 

@@ -6,7 +6,7 @@
 import pycurl
 
 def test(t, b):
-    print "debug(%d): %s" % (t, b)
+    print("debug(%d): %s" % (t, b))
 
 c = pycurl.Curl()
 c.setopt(pycurl.URL, 'http://curl.haxx.se/')

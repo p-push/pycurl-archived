@@ -41,21 +41,21 @@ def main():
                 count, good, bad = cm.info_read()
 
                 for h, en, em in bad:
-                        print "Transfer to %s failed with %d, %s\n" % \
-                            (h.getinfo(pycurl.EFFECTIVE_URL), en, em)
+                        print("Transfer to %s failed with %d, %s\n" % \
+                            (h.getinfo(pycurl.EFFECTIVE_URL), en, em))
                         raise RuntimeError
 
                 for h in good:
                         httpcode = h.getinfo(pycurl.RESPONSE_CODE)
                         if httpcode != 200:
-                                print "Transfer to %s failed with code %d\n" %\
-                                    (h.getinfo(pycurl.EFFECTIVE_URL), httpcode)
+                                print("Transfer to %s failed with code %d\n" %\
+                                    (h.getinfo(pycurl.EFFECTIVE_URL), httpcode))
                                 raise RuntimeError
 
                         else:
-                                print "Recd %d bytes from %s" % \
+                                print("Recd %d bytes from %s" % \
                                     (h.getinfo(pycurl.SIZE_DOWNLOAD),
-                                    h.getinfo(pycurl.EFFECTIVE_URL))
+                                    h.getinfo(pycurl.EFFECTIVE_URL)))
 
                 cm.remove_handle(eh)
                 eh.reset()
@@ -69,7 +69,7 @@ def main():
 
 if __name__ == '__main__':
         if len(sys.argv) != 2:
-                print "Usage: %s <url>" % sys.argv[0]
+                print("Usage: %s <url>" % sys.argv[0])
                 sys.exit(2)
         main()
 

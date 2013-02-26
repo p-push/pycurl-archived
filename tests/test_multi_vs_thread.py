@@ -59,10 +59,10 @@ def print_result(items):
     for c in items:
         data = c.body.getvalue()
         if 0:
-            print "**********", c.url, "**********"
-            print data
+            print("**********", c.url, "**********")
+            print(data)
         elif 1:
-            print "%-60s   %3d   %6d" % (c.url, c.http_code, len(data))
+            print("%-60s   %3d   %6d" % (c.url, c.http_code, len(data)))
 
 
 ###
@@ -104,7 +104,7 @@ def test_multi():
     m.close()
 
     clock4 = time.time()
-    print "multi  interface:        %d pages: perform %5.2f secs, total %5.2f secs" % (NUM_PAGES, clock3 - clock2, clock4 - clock1)
+    print("multi  interface:        %d pages: perform %5.2f secs, total %5.2f secs" % (NUM_PAGES, clock3 - clock2, clock4 - clock1))
 
     # print result
     print_result(handles)
@@ -174,9 +174,9 @@ def test_threads(lock=None):
 
     clock4 = time.time()
     if lock:
-        print "thread interface [lock]: %d pages: perform %5.2f secs, total %5.2f secs" % (NUM_PAGES, clock3 - clock2, clock4 - clock1)
+        print("thread interface [lock]: %d pages: perform %5.2f secs, total %5.2f secs" % (NUM_PAGES, clock3 - clock2, clock4 - clock1))
     else:
-        print "thread interface:        %d pages: perform %5.2f secs, total %5.2f secs" % (NUM_PAGES, clock3 - clock2, clock4 - clock1)
+        print("thread interface:        %d pages: perform %5.2f secs, total %5.2f secs" % (NUM_PAGES, clock3 - clock2, clock4 - clock1))
 
     # print result
     print_result(handles)
@@ -241,7 +241,7 @@ def test_thread_pool(lock):
         c.close()
 
     clock4 = time.time()
-    print "thread interface [pool]: %d pages: perform %5.2f secs, total %5.2f secs" % (NUM_PAGES, clock3 - clock2, clock4 - clock1)
+    print("thread interface [pool]: %d pages: perform %5.2f secs, total %5.2f secs" % (NUM_PAGES, clock3 - clock2, clock4 - clock1))
 
     # print result
     print_result(handles)

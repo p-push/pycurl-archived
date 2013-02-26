@@ -3,7 +3,7 @@ import StringIO
 import socket
 
 def socketopen(family, socktype, protocol):
-    print family, socktype, protocol
+    print(family, socktype, protocol)
     s = socket.socket(family, socktype, protocol)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     return s

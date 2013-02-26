@@ -41,10 +41,10 @@ if "-q" in sys.argv:
     opts.verbose = opts.verbose - 1
 
 
-print "Python", sys.version
-print "PycURL %s (compiled against 0x%x)" % (pycurl.version, pycurl.COMPILE_LIBCURL_VERSION_NUM)
-print "PycURL version info", pycurl.version_info()
-print "  %s, compiled %s" % (pycurl.__file__, pycurl.COMPILE_DATE)
+print("Python", sys.version)
+print("PycURL %s (compiled against 0x%x)" % (pycurl.version, pycurl.COMPILE_LIBCURL_VERSION_NUM))
+print("PycURL version info", pycurl.version_info())
+print("  %s, compiled %s" % (pycurl.__file__, pycurl.COMPILE_DATE))
 
 
 # /***********************************************************************
@@ -237,13 +237,13 @@ if 1 and gc:
     ##print gc.get_referrers(c)
     ##print gc.get_objects()
     if opts.verbose >= 1:
-        print "Tracked objects:", len(gc.get_objects())
+        print("Tracked objects:", len(gc.get_objects()))
     # The `del' below should delete these 4 objects:
     #   Curl + internal dict, CurlMulti + internal dict
     del c
     gc.collect()
     if opts.verbose >= 1:
-        print "Tracked objects:", len(gc.get_objects())
+        print("Tracked objects:", len(gc.get_objects()))
 
 if 1:
     # Ensure that the refcounting error in "reset" is fixed:
@@ -255,4 +255,4 @@ if 1:
 # // done
 # ************************************************************************/
 
-print "All tests passed."
+print("All tests passed.")
