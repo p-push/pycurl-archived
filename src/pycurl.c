@@ -166,6 +166,7 @@ typedef struct {
     PyObject *seek_cb;
     /* file objects */
     PyObject *readdata_fp;
+    PyObject *writedata;
     PyObject *writedata_fp;
     PyObject *writeheader_fp;
     /* misc */
@@ -841,6 +842,8 @@ util_curl_init(CurlObject *self)
     return (0);
 }
 
+size_t default_write_callback(char *ptr, size_t size, size_t nmemb, void *stream);
+
 /* constructor - this is a module-level function returning a new instance */
 static CurlObject *
 do_curl_new(PyObject *dummy)
@@ -863,6 +866,16 @@ do_curl_new(PyObject *dummy)
     res = util_curl_init(self);
     if (res < 0)
             goto error;
+#if PY_MAJOR_VERSION >= 3
+    res = curl_easy_setopt(self->handle, CURLOPT_WRITEFUNCTION, default_write_callback);
+    if (res != CURLE_OK) {
+        goto error;
+    }
+    res = curl_easy_setopt(self->handle, CURLOPT_WRITEDATA, self);
+    if (res != CURLE_OK) {
+        goto error;
+    }
+#endif    
     /* Success - return new object */
     return self;
 
@@ -1172,6 +1185,52 @@ write_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
     return util_write_callback(0, ptr, size, nmemb, stream);
 }
+
+
+size_t
+default_write_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+{
+    CurlObject *obj = (CurlObject *)stream;
+    PyThreadState *tmp_state;
+    CurlObject *self = (CurlObject *)stream;
+
+    /* acquire thread */
+    int ret = 0;
+    tmp_state = get_thread_state(self);
+    if (tmp_state == NULL)
+        return ret;
+    PyEval_AcquireThread(tmp_state);
+
+    if(obj->writedata_fp != NULL) 
+    {
+        /** 
+         * I'd prefer this code, but
+         * PyFile_WriteObject converts the object to str or repr, which are of type str
+         * and the write() fn expects bytes or buffer ...
+         */
+/* 
+        PyObject *w = PyBytes_FromStringAndSize(ptr, size*nmemb);
+        printf("writedata_fp %p w %p s %i\n", obj->writedata_fp, w, PyBytes_GET_SIZE(w));
+        Py_INCREF(w);
+        if( PyFile_WriteObject(w, obj->writedata_fp, Py_PRINT_RAW) != 0 )
+        {
+            PyErr_Print();
+            ret = -1;
+        }
+
+        Py_DECREF(w);
+*/
+        int fd = PyObject_AsFileDescriptor(((CurlObject *)stream)->writedata_fp);
+        ret = write(fd, ptr, size*nmemb);
+    }else
+    {
+        fwrite(ptr, size, nmemb, stdout);
+    }
+
+    PyEval_ReleaseThread(tmp_state);
+    return ret;
+}
+
 
 static size_t
 header_callback(char *ptr, size_t size, size_t nmemb, void *stream)
@@ -1846,7 +1905,7 @@ do_curl_setopt(CurlObject *self, PyObject *args)
     /* Handle the case of file objects */
 #if PY_MAJOR_VERSION >= 3
     extern PyTypeObject PyIOBase_Type;
-    if(PyObject_IsInstance(obj, (PyObject *)&PyIOBase_Type) ) {
+    if(PyObject_IsInstance(obj, (PyObject *)&PyIOBase_Type) == 1) {
 #else
     if (PyFile_Check(obj)) {
 #endif
@@ -1868,19 +1927,21 @@ do_curl_setopt(CurlObject *self, PyObject *args)
             return NULL;
         }
 #if PY_MAJOR_VERSION >= 3
-        int fd = PyObject_AsFileDescriptor(obj);
-        fp = fdopen(fd, "w");
+//        printf("WRITEDATA %p\n",obj);
+//        int fd = PyObject_AsFileDescriptor(obj);
+//        printf("fd is %i\n", fd);
+//        fp = fdopen(fd, "w");
 #else
         fp = PyFile_AsFile(obj);
-#endif
         if (fp == NULL) {
             PyErr_SetString(PyExc_TypeError, "second argument must be open file");
             return NULL;
         }
-        res = curl_easy_setopt(self->handle, (CURLoption)CURLOPT_WRITEDATA, fp);
+        res = curl_easy_setopt(self->handle, (CURLoption)option, fp);
         if (res != CURLE_OK) {
             CURLERROR_RETVAL();
         }
+#endif
         Py_INCREF(obj);
 
         switch (option) {
