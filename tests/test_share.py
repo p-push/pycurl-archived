@@ -7,7 +7,7 @@ import sys
 import pycurl
 import threading
 
-print >>sys.stderr, 'Testing', pycurl.version
+sys.stderr.write("Testing %s\n" % pycurl.version)
 
 
 class Test(threading.Thread):
