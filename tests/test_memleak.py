@@ -19,7 +19,10 @@ print("  %s, compiled %s" % (pycurl.__file__, pycurl.COMPILE_DATE))
 
 
 gc.collect()
-flags = gc.DEBUG_COLLECTABLE | gc.DEBUG_UNCOLLECTABLE | gc.DEBUG_OBJECTS
+flags = gc.DEBUG_COLLECTABLE | gc.DEBUG_UNCOLLECTABLE
+# python 3 has no DEBUG_OBJECTS
+if hasattr(gc, 'DEBUG_OBJECTS'):
+    flags |= gc.DEBUG_OBJECTS
 if 1:
     flags = flags | gc.DEBUG_STATS
 gc.set_debug(flags)
