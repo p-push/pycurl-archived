@@ -1,5 +1,8 @@
 import pycurl
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import socket
 
 def socketopen(family, socktype, protocol):
@@ -8,7 +11,7 @@ def socketopen(family, socktype, protocol):
     s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     return s
 
-sio = StringIO.StringIO()
+sio = StringIO()
 
 c = pycurl.Curl()
 c.setopt(pycurl.OPENSOCKETFUNCTION, socketopen)

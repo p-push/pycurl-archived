@@ -16,7 +16,10 @@ try:
 except ImportError:
     gc = None
 import copy, os, sys
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 try:
     import cPickle
 except ImportError:
