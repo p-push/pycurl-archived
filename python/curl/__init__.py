@@ -66,7 +66,7 @@ class Curl:
 
     def set_option(self, *args):
         "Set an option on the retrieval."
-        apply(self.handle.setopt, args)
+        self.handle.setopt(*args)
 
     def set_verbosity(self, level):
         "Set verbosity to 1 to see transactions."
@@ -106,7 +106,7 @@ class Curl:
 
     def get_info(self, *args):
         "Get information about retrieval."
-        return apply(self.handle.getinfo, args)
+        return self.handle.getinfo(*args)
 
     def info(self):
         "Return a dictionary with all info on the last response."
