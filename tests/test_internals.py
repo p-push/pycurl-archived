@@ -151,13 +151,14 @@ if 1 and copy:
     m = CurlMulti()
     try:
         copy.copy(c)
-    except copy.Error:
+    # python 2 raises copy.Error, python 3 raises TypeError
+    except (copy.Error, TypeError):
         pass
     else:
         assert 0, "internal error - copying should fail"
     try:
         copy.copy(m)
-    except copy.Error:
+    except (copy.Error, TypeError):
         pass
     else:
         assert 0, "internal error - copying should fail"
@@ -169,13 +170,14 @@ if 1 and pickle:
     p = pickle.Pickler(fp, 1)
     try:
         p.dump(c)
-    except pickle.PicklingError:
+    # python 2 raises pickle.PicklingError, python 3 raises TypeError
+    except (pickle.PicklingError, TypeError):
         pass
     else:
         assert 0, "internal error - pickling should fail"
     try:
         p.dump(m)
-    except pickle.PicklingError:
+    except (pickle.PicklingError, TypeError):
         pass
     else:
         assert 0, "internal error - pickling should fail"
