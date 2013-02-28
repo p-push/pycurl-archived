@@ -249,8 +249,12 @@ if 1 and gc:
         print("Tracked objects:", len(gc.get_objects()))
 
 if 1:
+    try:
+        range_generator = xrange
+    except NameError:
+        range_generator = range
     # Ensure that the refcounting error in "reset" is fixed:
-    for i in xrange(100000):
+    for i in range_generator(100000):
         c = Curl()
         c.reset()
 
