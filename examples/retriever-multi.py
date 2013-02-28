@@ -10,7 +10,6 @@
 
 import sys
 import pycurl
-import time
 
 # We should ignore SIGPIPE when using pycurl.NOSIGNAL - see
 # the libcurl tutorial for more info.
@@ -124,5 +123,3 @@ for c in m.handles:
         c.fp = None
     c.close()
 m.close()
-
-#time.sleep(30)
