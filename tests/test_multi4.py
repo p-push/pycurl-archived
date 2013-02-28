@@ -35,7 +35,7 @@ while 1:
 
 # Keep going until all the connections have terminated
 while num_handles:
-    apply(select.select, m.fdset() + (SELECT_TIMEOUT,))
+    select.select(*m.fdset() + (SELECT_TIMEOUT,))
     while 1:
         ret, num_handles = m.perform()
         if ret != pycurl.E_CALL_MULTI_PERFORM:
