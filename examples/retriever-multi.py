@@ -79,9 +79,6 @@ while num_processed < num_urls:
         c.fp = open(filename, "wb")
         c.setopt(pycurl.URL, url)
         c.setopt(pycurl.WRITEDATA, c.fp)
-#        print(c.fp)
-#        c.fp.close()
-#        c.fp = None
         m.add_handle(c)
         # store some info
         c.filename = filename
@@ -95,7 +92,6 @@ while num_processed < num_urls:
     while 1:
         num_q, ok_list, err_list = m.info_read()
         for c in ok_list:
-            c.fp.flush()
             c.fp.close()
             c.fp = None
             m.remove_handle(c)
