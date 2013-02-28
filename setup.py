@@ -222,4 +222,4 @@ if __name__ == "__main__":
     for o in ext.extra_objects:
         assert os.path.isfile(o), o
     # We can live with the deprecationwarning for a while
-    setup(*(), **setup_args)
+    setup(**setup_args)
