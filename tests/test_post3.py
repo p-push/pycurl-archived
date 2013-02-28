@@ -3,8 +3,11 @@
 # vi:ts=4:et
 # $Id$
 
-import urllib
-POSTSTRING = urllib.urlencode({'field1':'value1', 'field2':'value2 with blanks', 'field3':'value3'})
+try:
+    import urllib.parse as urllib_parse
+except ImportError:
+    import urllib as urllib_parse
+POSTSTRING = urllib_parse.urlencode({'field1':'value1', 'field2':'value2 with blanks', 'field3':'value3'})
 
 class test:
 
