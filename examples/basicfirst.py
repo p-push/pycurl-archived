@@ -15,15 +15,11 @@ class Test:
 
 print('Testing', pycurl.version, file=sys.stderr)
 
-try:
-    t = Test()
-    c = pycurl.Curl()
-    c.setopt(c.URL, sys.argv[1])
-    c.setopt(c.WRITEFUNCTION, t.body_callback)
-    c.perform()
-    c.close()
-#    print(t)
-    print(t.contents)
-except Exception as e:
-    print(e)
+t = Test()
+c = pycurl.Curl()
+c.setopt(c.URL, sys.argv[1])
+c.setopt(c.WRITEFUNCTION, t.body_callback)
+c.perform()
+c.close()
 
+print(t.contents)
