@@ -1224,7 +1224,10 @@ default_write_callback(char *ptr, size_t size, size_t nmemb, void *stream)
         ret = write(fd, ptr, size*nmemb);
     }else
     {
-        fwrite(ptr, size, nmemb, stdout);
+        ret = fwrite(ptr, size, nmemb, stdout);
+        if (ret > 0) {
+            ret *= size;
+        }
     }
 
     PyEval_ReleaseThread(tmp_state);
