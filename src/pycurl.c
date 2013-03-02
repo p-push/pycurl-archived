@@ -866,6 +866,7 @@ do_curl_new(PyObject *dummy)
     res = util_curl_init(self);
     if (res < 0)
             goto error;
+/*
 #if PY_MAJOR_VERSION >= 3
     res = curl_easy_setopt(self->handle, CURLOPT_WRITEFUNCTION, default_write_callback);
     if (res != CURLE_OK) {
@@ -876,6 +877,7 @@ do_curl_new(PyObject *dummy)
         goto error;
     }
 #endif    
+*/
     /* Success - return new object */
     return self;
 
