@@ -94,6 +94,10 @@ static void pycurl_ssl_init(void);
 static void pycurl_ssl_cleanup(void);
 #endif
 
+#if PY_MAJOR_VERSION < 3
+#define Py_TYPE(x) (x)->ob_type
+#endif
+
 /* Calculate the number of OBJECTPOINT options we need to store */
 #define OPTIONS_SIZE    ((int)CURLOPT_LASTENTRY % 10000)
 #define MOPTIONS_SIZE   ((int)CURLMOPT_LASTENTRY % 10000)
@@ -263,7 +267,7 @@ get_thread_state(const CurlObject *self)
      */
     if (self == NULL)
         return NULL;
-    assert(self->ob_type == p_Curl_Type);
+    assert(Py_TYPE(self) == p_Curl_Type);
     if (self->state != NULL)
     {
         /* inside perform() */
@@ -293,7 +297,7 @@ get_thread_state_multi(const CurlMultiObject *self)
      */
     if (self == NULL)
         return NULL;
-    assert(self->ob_type == p_CurlMulti_Type);
+    assert(Py_TYPE(self) == p_CurlMulti_Type);
     if (self->state != NULL)
     {
         /* inside multi_perform() */
@@ -309,7 +313,7 @@ static void
 assert_share_state(const CurlShareObject *self)
 {
     assert(self != NULL);
-    assert(self->ob_type == p_CurlShare_Type);
+    assert(Py_TYPE(self) == p_CurlShare_Type);
     assert(self->lock != NULL);
 }
 
@@ -319,7 +323,7 @@ static void
 assert_curl_state(const CurlObject *self)
 {
     assert(self != NULL);
-    assert(self->ob_type == p_Curl_Type);
+    assert(Py_TYPE(self) == p_Curl_Type);
     (void) get_thread_state(self);
 }
 
@@ -329,7 +333,7 @@ static void
 assert_multi_state(const CurlMultiObject *self)
 {
     assert(self != NULL);
-    assert(self->ob_type == p_CurlMulti_Type);
+    assert(Py_TYPE(self) == p_CurlMulti_Type);
     if (self->state != NULL) {
         assert(self->multi_handle != NULL);
     }
@@ -885,7 +889,7 @@ util_curl_close(CurlObject *self)
     /* Zero handle and thread-state to disallow any operations to be run
      * from now on */
     assert(self != NULL);
-    assert(self->ob_type == p_Curl_Type);
+    assert(Py_TYPE(self) == p_Curl_Type);
     handle = self->handle;
     self->handle = NULL;
     if (handle == NULL) {
@@ -2889,7 +2893,7 @@ do_multi_info_read(CurlMultiObject *self, PyObject *args)
             Py_DECREF(ok_list);
             CURLERROR_MSG("Unable to fetch curl handle from curl object");
         }
-        assert(co->ob_type == p_Curl_Type);
+        assert(Py_TYPE(co) == p_Curl_Type);
         if (msg->msg != CURLMSG_DONE) {
             /* FIXME: what does this mean ??? */
         }
