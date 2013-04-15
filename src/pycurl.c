@@ -713,7 +713,8 @@ do_curlshare_setopt(CurlShareObject *self, PyObject *args)
 
     /* Handle the case of integer arguments */
     if (PyInt_Check(obj)) {
-        long d = PyInt_AsLong(obj);
+        long d = PyLong_AsLong(obj);
+
         if (d != CURL_LOCK_DATA_COOKIE && d != CURL_LOCK_DATA_DNS) {
             goto error;
         }
@@ -1263,6 +1264,7 @@ opensocket_callback(void *clientp, curlsocktype purpose,
 	    ret = CURL_SOCKET_BAD;
 	    goto verbose_error;
 	}
+
 	// normal operation:
 	if (PyInt_Check(fileno_result)) {
 	    ret = dup(PyInt_AsLong(fileno_result));
@@ -1585,6 +1587,7 @@ ioctl_callback(CURL *curlobj, int cmd, void *stream)
     if (result == Py_None) {
         ret = CURLIOE_OK;        /* None means success */
     }
+
     else if (PyInt_Check(result)) {
         ret = (int) PyInt_AsLong(result);
         if (ret >= CURLIOE_LAST || ret < 0) {
@@ -1850,7 +1853,6 @@ do_curl_setopt(CurlObject *self, PyObject *args)
     /* Handle the case of integer arguments */
     if (PyInt_Check(obj)) {
         long d = PyInt_AsLong(obj);
-
         if (IS_LONG_OPTION(option))
             res = curl_easy_setopt(self->handle, (CURLoption)option, (long)d);
         else if (IS_OFF_T_OPTION(option))
@@ -1914,7 +1916,12 @@ do_curl_setopt(CurlObject *self, PyObject *args)
             PyErr_SetString(PyExc_TypeError, "files are not supported for this option");
             return NULL;
         }
-
+#if PY_MAJOR_VERSION >= 3
+//        printf("WRITEDATA %p\n",obj);
+//        int fd = PyObject_AsFileDescriptor(obj);
+//        printf("fd is %i\n", fd);
+//        fp = fdopen(fd, "w");
+#else
         fp = PyFile_AsFile(obj);
         if (fp == NULL) {
             PyErr_SetString(PyExc_TypeError, "second argument must be open file");
@@ -1924,6 +1931,7 @@ do_curl_setopt(CurlObject *self, PyObject *args)
         if (res != CURLE_OK) {
             CURLERROR_RETVAL();
         }
+#endif
         Py_INCREF(obj);
 
         switch (option) {
@@ -3137,7 +3145,6 @@ do_multi_select(CurlMultiObject *self, PyObject *args)
          *       socket code to report any errors.
          */
     }
-
     return PyInt_FromLong(n);
 }
 
@@ -3345,6 +3352,7 @@ my_getattr(PyObject *co, char *name, PyObject *dict1, PyObject *dict2, PyMethodD
     }
     return Py_FindMethod(m, co, name);
 }
+
 
 static int
 do_share_setattr(CurlShareObject *so, char *name, PyObject *v)
