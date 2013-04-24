@@ -236,7 +236,6 @@ int PyUnicode_AsStringAndSize(PyObject *obj, char **buffer, Py_ssize_t *length)
  * embedded NULs. Actually PyString_AsStringAndSize() already does that for
  * us if the `len' parameter is NULL - see Objects/stringobject.c.
  */
-
 static char *PyString_AsString_NoNUL(PyObject *obj)
 {
     char *s = NULL;
