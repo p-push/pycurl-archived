@@ -830,7 +830,7 @@ do_curl_new(PyObject *dummy)
     return self;
 
 error:
-    Py_DECREF(self);    /* this also closes self->handle */
+    Py_XDECREF(self);    /* this also closes self->handle */
     PyErr_SetString(ErrorObject, "initializing curl failed");
     return NULL;
 }
