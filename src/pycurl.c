@@ -204,6 +204,33 @@ typedef struct {
 #  define PY_LONG_LONG LONG_LONG
 #endif
 
+int PyUnicode_AsStringAndSize(PyObject *obj, char **buffer, Py_ssize_t *length)
+{
+	Py_ssize_t pysize = PyUnicode_GetSize(obj);
+	wchar_t * str = (wchar_t *) malloc((pysize + 1) * sizeof(wchar_t));
+	PyUnicode_AsWideChar((PyUnicodeObject *) obj, str, pysize);
+	str[pysize] = '\0';
+
+// measure size
+	size_t csize = wcstombs(0, str, 0);
+	if( csize == (size_t) -1 )
+	{
+		free(str);
+		return -1; 
+	}
+
+	char *cstr = (char *) malloc(csize + 1);
+
+// convert
+	wcstombs(cstr, str, csize + 1);
+	*buffer = cstr;
+	if( length )
+		*length = csize;
+	free(str);
+	return 0;
+}
+
+
 /* Like PyString_AsString(), but set an exception if the string contains
  * embedded NULs. Actually PyString_AsStringAndSize() already does that for
  * us if the `len' parameter is NULL - see Objects/stringobject.c.
@@ -213,7 +240,11 @@ static char *PyString_AsString_NoNUL(PyObject *obj)
 {
     char *s = NULL;
     Py_ssize_t r;
+#if PY_MAJOR_VERSION >= 3
+    r = PyUnicode_AsStringAndSize(obj, &s, NULL);
+#else
     r = PyString_AsStringAndSize(obj, &s, NULL);
+#endif
     if (r != 0)
         return NULL;    /* exception already set */
     assert(s != NULL);
@@ -238,7 +269,11 @@ static PyObject *convert_slist(struct curl_slist *slist, int free_flags)
         if (slist->data == NULL) {
             v = Py_None; Py_INCREF(v);
         } else {
+#if PY_MAJOR_VERSION >= 3
+            v = PyUnicode_FromString(slist->data);
+#else
             v = PyString_FromString(slist->data);
+#endif
         }
         if (v == NULL || PyList_Append(ret, v) != 0) {
             Py_XDECREF(v);
@@ -971,7 +1006,12 @@ do_curl_errstr(CurlObject *self)
         return NULL;
     }
     self->error[sizeof(self->error) - 1] = 0;
+
+#if PY_MAJOR_VERSION >= 3
+    return PyUnicode_FromString(self->error);
+#else
     return PyString_FromString(self->error);
+#endif
 }
 
 
@@ -1297,11 +1337,19 @@ read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
         goto verbose_error;
 
     /* handle result */
+#if PY_MAJOR_VERSION >= 3
+    if (PyBytes_Check(result)) {
+#else
     if (PyString_Check(result)) {
+#endif
         char *buf = NULL;
         Py_ssize_t obj_size = -1;
         Py_ssize_t r;
+#if PY_MAJOR_VERSION >= 3
+        r = PyBytes_AsStringAndSize(result, &buf, &obj_size);
+#else
         r = PyString_AsStringAndSize(result, &buf, &obj_size);
+#endif
         if (r != 0 || obj_size < 0 || obj_size > total_size) {
             PyErr_Format(ErrorObject, "invalid return value for read callback %ld %ld", (long)obj_size, (long)total_size);
             goto verbose_error;
@@ -1648,7 +1696,12 @@ do_curl_setopt(CurlObject *self, PyObject *args)
     }
 
     /* Handle the case of string arguments */
+
+#if PY_MAJOR_VERSION >= 3
+    if (PyUnicode_Check(obj)) {
+#else
     if (PyString_Check(obj)) {
+#endif
         char *str = NULL;
         Py_ssize_t len = -1;
 
@@ -1695,8 +1748,13 @@ do_curl_setopt(CurlObject *self, PyObject *args)
                 return NULL;
             break;
         case CURLOPT_POSTFIELDS:
+#if PY_MAJOR_VERSION >= 3
+            if (PyUnicode_AsStringAndSize(obj, &str, &len) != 0)
+                return NULL;
+#else
             if (PyString_AsStringAndSize(obj, &str, &len) != 0)
                 return NULL;
+#endif
             /* automatically set POSTFIELDSIZE */
             if (len <= INT_MAX) {
                 res = curl_easy_setopt(self->handle, CURLOPT_POSTFIELDSIZE, (long)len);
@@ -1887,14 +1945,27 @@ do_curl_setopt(CurlObject *self, PyObject *args)
                     PyErr_SetString(PyExc_TypeError, "tuple must contain two elements (name, value)");
                     return NULL;
                 }
+#if PY_MAJOR_VERSION >= 3
+                if (PyUnicode_AsStringAndSize(PyTuple_GET_ITEM(listitem, 0), &nstr, &nlen) != 0) {
+#else
                 if (PyString_AsStringAndSize(PyTuple_GET_ITEM(listitem, 0), &nstr, &nlen) != 0) {
+#endif
                     curl_formfree(post);
                     PyErr_SetString(PyExc_TypeError, "tuple must contain string as first element");
                     return NULL;
                 }
+#if PY_MAJOR_VERSION >= 3
+                if (PyUnicode_Check(PyTuple_GET_ITEM(listitem, 1))) {
+#else
                 if (PyString_Check(PyTuple_GET_ITEM(listitem, 1))) {
+#endif
                     /* Handle strings as second argument for backwards compatibility */
+
+#if PY_MAJOR_VERSION >= 3
+                    PyUnicode_AsStringAndSize(PyTuple_GET_ITEM(listitem, 1), &cstr, &clen);
+#else
                     PyString_AsStringAndSize(PyTuple_GET_ITEM(listitem, 1), &cstr, &clen);
+#endif
                     /* INFO: curl_formadd() internally does memdup() the data, so
                      * embedded NUL characters _are_ allowed here. */
                     res = curl_formadd(&post, &last,
@@ -1948,7 +2019,11 @@ do_curl_setopt(CurlObject *self, PyObject *args)
                             curl_formfree(post);
                             return NULL;
                         }
+#if PY_MAJOR_VERSION >= 3
+                        if (!PyUnicode_Check(PyTuple_GET_ITEM(t, j+1))) {
+#else
                         if (!PyString_Check(PyTuple_GET_ITEM(t, j+1))) {
+#endif
                             PyErr_SetString(PyExc_TypeError, "value must be string");
                             PyMem_Free(forms);
                             curl_formfree(post);
@@ -1966,7 +2041,11 @@ do_curl_setopt(CurlObject *self, PyObject *args)
                             curl_formfree(post);
                             return NULL;
                         }
+#if PY_MAJOR_VERSION >= 3
+                        PyUnicode_AsStringAndSize(PyTuple_GET_ITEM(t, j+1), &ostr, &olen);
+#else
                         PyString_AsStringAndSize(PyTuple_GET_ITEM(t, j+1), &ostr, &olen);
+#endif
                         forms[k].option = val;
                         forms[k].value = ostr;
                         ++k;
@@ -2018,7 +2097,11 @@ do_curl_setopt(CurlObject *self, PyObject *args)
             struct curl_slist *nlist;
             char *str;
 
+#if PY_MAJOR_VERSION >= 3
+            if (!PyUnicode_Check(listitem)) {
+#else
             if (!PyString_Check(listitem)) {
+#endif
                 curl_slist_free_all(slist);
                 PyErr_SetString(PyExc_TypeError, "list items must be string objects");
                 return NULL;
@@ -2241,7 +2324,12 @@ do_curl_getinfo(CurlObject *self, PyObject *args)
                 Py_INCREF(Py_None);
                 return Py_None;
             }
+#if PY_MAJOR_VERSION >= 3
+            return PyUnicode_FromString(s_res);
+#else
             return PyString_FromString(s_res);
+#endif
+
         }
 
     case CURLINFO_CONNECT_TIME:
@@ -3525,7 +3613,11 @@ static PyObject *vi_str(const char *s)
     }
     while (*s == ' ' || *s == '\t')
         s++;
+#if PY_MAJOR_VERSION >= 3
+    return PyUnicode_FromString(s);
+#else
     return PyString_FromString(s);
+#endif
 }
 
 static PyObject *
@@ -3652,7 +3744,13 @@ insobj2(PyObject *dict1, PyObject *dict2, char *name, PyObject *value)
         goto error;
     if (value == NULL)
         goto error;
+
+#if PY_MAJOR_VERSION >= 3
+    key = PyUnicode_FromString(name);
+#else
     key = PyString_FromString(name);
+#endif
+
     if (key == NULL)
         goto error;
 #if 0
@@ -3679,7 +3777,11 @@ error:
 static void
 insstr(PyObject *d, char *name, char *value)
 {
+#if PY_MAJOR_VERSION >= 3
+    PyObject *v = PyUnicode_FromString(value);
+#else    
     PyObject *v = PyString_FromString(value);
+#endif
     insobj2(d, NULL, name, v);
 }
 
