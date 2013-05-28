@@ -1828,7 +1828,12 @@ do_curl_setopt(CurlObject *self, PyObject *args)
 #undef IS_OFF_T_OPTION
 
     /* Handle the case of file objects */
+#if PY_MAJOR_VERSION >= 3
+    extern PyTypeObject PyIOBase_Type;
+    if(PyObject_IsInstance(obj, (PyObject *)&PyIOBase_Type) == 1) {
+#else
     if (PyFile_Check(obj)) {
+#endif
         FILE *fp;
 
         /* Ensure the option specified a file as well as the input */
