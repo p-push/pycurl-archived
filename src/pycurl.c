@@ -3635,9 +3635,9 @@ initpycurl(void)
     p_Curl_Type = &Curl_Type;
     p_CurlMulti_Type = &CurlMulti_Type;
     p_CurlShare_Type = &CurlShare_Type;
-    Curl_Type.ob_type = &PyType_Type;
-    CurlMulti_Type.ob_type = &PyType_Type;
-    CurlShare_Type.ob_type = &PyType_Type;
+    Py_TYPE(&Curl_Type) = &PyType_Type;
+    Py_TYPE(&CurlMulti_Type) = &PyType_Type;
+    Py_TYPE(&CurlShare_Type) = &PyType_Type;
 
     /* Create the module and add the functions */
 #if PY_MAJOR_VERSION >= 3
