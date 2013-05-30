@@ -1835,23 +1835,46 @@ do_curl_setopt(CurlObject *self, PyObject *args)
     if (PyFile_Check(obj)) {
 #endif
         FILE *fp;
+        CURLoption cb_option = 0;
 
         /* Ensure the option specified a file as well as the input */
         switch (option) {
         case CURLOPT_READDATA:
+#if PY_MAJOR_VERSION >= 3
+            if (self->r_cb == NULL) {
+                cb_option = CURLOPT_READFUNCTION;
+            }
+#endif
+            break;
         case CURLOPT_WRITEDATA:
+#if PY_MAJOR_VERSION >= 3
+            if (self->w_cb == NULL) {
+                cb_option = CURLOPT_WRITEFUNCTION;
+            }
+#endif
             break;
         case CURLOPT_WRITEHEADER:
             if (self->w_cb != NULL) {
                 PyErr_SetString(ErrorObject, "cannot combine WRITEHEADER with WRITEFUNCTION.");
                 return NULL;
             }
+#if PY_MAJOR_VERSION >= 3
+            if (self->h_cb == NULL) {
+                cb_option = CURLOPT_HEADERFUNCTION;
+            }
+#endif
             break;
         default:
             PyErr_SetString(PyExc_TypeError, "files are not supported for this option");
             return NULL;
         }
 
+#if PY_MAJOR_VERSION >= 3
+        res = curl_easy_setopt(self->handle, (CURLoption)option, obj);
+        if (res != CURLE_OK) {
+            CURLERROR_RETVAL();
+        }
+#else
         fp = PyFile_AsFile(obj);
         if (fp == NULL) {
             PyErr_SetString(PyExc_TypeError, "second argument must be open file");
@@ -1861,6 +1884,7 @@ do_curl_setopt(CurlObject *self, PyObject *args)
         if (res != CURLE_OK) {
             CURLERROR_RETVAL();
         }
+#endif
         Py_INCREF(obj);
 
         switch (option) {
